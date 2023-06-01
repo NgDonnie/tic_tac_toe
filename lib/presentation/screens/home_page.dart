@@ -9,235 +9,183 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  bool oTurn = true;
-   
-  // 1st player is O
-  List<String> displayElement = ['', '', '', '', '', '', '', '', ''];
-  int oScore = 0;
-  int xScore = 0;
-  int filledBoxes = 0;
+  // Create a 3x3 board
+  // Each cell will be represented by a string
+  List<List<String>> _board = [
+    ['', '', ''],
+    ['', '', ''],
+    ['', '', ''],
+  ];
+
+  // Keep track of the current player (a player can be 'X' or 'O')
+  String _player = 'X';
+  String _result = '';
+
+  // Make a move
+  // This function will be called when a player taps on a cell
+  void _play(int row, int col) {
+    if (_board[row][col] == '') {
+      setState(() {
+        _board[row][col] = _player;
+        _checkWin();
+        if (_result == '') {
+          _player = _player == 'X' ? 'O' : 'X';
+        }
+      });
+    }
+  }
+
+  // Check if there is a winner
+  // This function will be called after every move
+  void _checkWin() {
+    for (int i = 0; i < 3; i++) {
+      if (_board[i][0] == _board[i][1] &&
+          _board[i][1] == _board[i][2] &&
+          _board[i][0] != '') {
+        _result = '${_board[i][0]} wins!';
+        return;
+      }
+      if (_board[0][i] == _board[1][i] &&
+          _board[1][i] == _board[2][i] &&
+          _board[0][i] != '') {
+        _result = '${_board[0][i]} wins!';
+        return;
+      }
+    }
+    if (_board[0][0] == _board[1][1] &&
+        _board[1][1] == _board[2][2] &&
+        _board[0][0] != '') {
+      _result = '${_board[0][0]} wins!';
+      return;
+    }
+    if (_board[0][2] == _board[1][1] &&
+        _board[1][1] == _board[2][0] &&
+        _board[0][2] != '') {
+      _result = '${_board[0][2]} wins!';
+      return;
+    }
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        if (_board[i][j] == '') {
+          return;
+        }
+      }
+    }
+    _result = 'Draw!';
+  }
+
+  // Reset the game
+  // This function will be called when the reset button is pressed
+  void _reset() {
+    setState(() {
+      _board = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', ''],
+      ];
+      _player = 'X';
+      _result = '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.indigo[900],
+    return  Scaffold(
+      appBar: AppBar(
+        title: const Text('Tic Tac Toes'),
+      ),
       body: Column(
-        children: <Widget>[
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Draw the board
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Text(
-                        'Player X',
-                        style: TextStyle(fontSize: 20,
-                                         fontWeight: FontWeight.bold,
-                                         color: Colors.white),
-                      ),
-                      Text(
-                        xScore.toString(),
-                        style: const TextStyle(fontSize: 20,color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Text('Player O', style: TextStyle(fontSize: 20,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: Colors.white)
-                      ),
-                      Text(
-                        oScore.toString(),
-                        style: const TextStyle(fontSize: 20,color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 4,
             child: GridView.builder(
-                itemCount: 9,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3),
-                itemBuilder: (BuildContext context, int index) {
-                  return GestureDetector(
-                    onTap: () {
-                      _tapped(index);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.white)),
-                      child: Center(
-                        child: Text(
-                          displayElement[index],
-                          style: const TextStyle(color: Colors.white, fontSize: 35),
+              padding: const EdgeInsets.all(20.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 1.0,
+                crossAxisSpacing: 10.0,
+                mainAxisSpacing: 10.0,
+              ),
+              itemCount: 9,
+              itemBuilder: (context, index) {
+                int row = index ~/ 3;
+                int col = index % 3;
+                return GestureDetector(
+                  onTap: () => _play(row, col),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 2.0,
+                      ),
+                      color: _board[row][col] == 'X'
+                          ? Colors.red
+                          : _board[row][col] == 'O'
+                              ? Colors.blue
+                              : Colors.white,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _board[row][col],
+                        style: const TextStyle(
+                          fontSize: 40.0,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  );
-                }),
-          ),
-          Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo[50],
-                      textStyle: const TextStyle(color: Colors.black),
-                    ),
-                    onPressed: _clearScoreBoard,
-                    child: const Text("Clear Score Board"),
                   ),
-                ],
-              ))
+                );
+              },
+            ),
+          ),
+
+          // Display the current player
+          Container(
+            padding: const EdgeInsets.all(20.0),
+            child: Text(
+              'Player $_player turn',
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          // Display the result
+          Container(
+            padding: const EdgeInsets.all(20.0),
+            child: Text(
+              _result,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: _result == '' ? Colors.transparent : Colors.blue,
+              ),
+            ),
+          ),
+
+          // Reset button
+          Container(
+            padding: const EdgeInsets.all(20.0),
+            child: ElevatedButton(
+              onPressed: _reset,
+              child: const Text(
+                'Reset',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
-  }
- void _tapped(int index) {
-    setState(() {
-      if (oTurn && displayElement[index] == '') {
-        displayElement[index] = 'O';
-        filledBoxes++;
-      } else if (!oTurn && displayElement[index] == '') {
-        displayElement[index] = 'X';
-        filledBoxes++;
-      }
- 
-      oTurn = !oTurn;
-      _checkWinner();
-    });
-  }
- 
-  void _checkWinner() {
-     
-    // Checking rows
-    if (displayElement[0] == displayElement[1] &&
-        displayElement[0] == displayElement[2] &&
-        displayElement[0] != '') {
-      _showWinDialog(displayElement[0]);
     }
-    if (displayElement[3] == displayElement[4] &&
-        displayElement[3] == displayElement[5] &&
-        displayElement[3] != '') {
-      _showWinDialog(displayElement[3]);
-    }
-    if (displayElement[6] == displayElement[7] &&
-        displayElement[6] == displayElement[8] &&
-        displayElement[6] != '') {
-      _showWinDialog(displayElement[6]);
-    }
+  
+
  
-    // Checking Column
-    if (displayElement[0] == displayElement[3] &&
-        displayElement[0] == displayElement[6] &&
-        displayElement[0] != '') {
-      _showWinDialog(displayElement[0]);
-    }
-    if (displayElement[1] == displayElement[4] &&
-        displayElement[1] == displayElement[7] &&
-        displayElement[1] != '') {
-      _showWinDialog(displayElement[1]);
-    }
-    if (displayElement[2] == displayElement[5] &&
-        displayElement[2] == displayElement[8] &&
-        displayElement[2] != '') {
-      _showWinDialog(displayElement[2]);
-    }
- 
-    // Checking Diagonal
-    if (displayElement[0] == displayElement[4] &&
-        displayElement[0] == displayElement[8] &&
-        displayElement[0] != '') {
-      _showWinDialog(displayElement[0]);
-    }
-    if (displayElement[2] == displayElement[4] &&
-        displayElement[2] == displayElement[6] &&
-        displayElement[2] != '') {
-      _showWinDialog(displayElement[2]);
-    } else if (filledBoxes == 9) {
-      _showDrawDialog();
-    }
-  }
- 
-  void _showWinDialog(String winner) {
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("\" $winner \" is Winner!!!"),
-            actions: [
-              ElevatedButton(
-                child: const Text("Play Again"),
-                onPressed: () {
-                  _clearBoard();
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
- 
-    if (winner == 'O') {
-      oScore++;
-    } else if (winner == 'X') {
-      xScore++;
-    }
-  }
- 
-  void _showDrawDialog() {
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Draw"),
-            actions: [
-              ElevatedButton(
-                child: const Text("Play Again"),
-                onPressed: () {
-                  _clearBoard();
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
-  }
- 
-  void _clearBoard() {
-    setState(() {
-      for (int i = 0; i < 9; i++) {
-        displayElement[i] = '';
-      }
-    });
- 
-    filledBoxes = 0;
-  }
- 
-  void _clearScoreBoard() {
-    setState(() {
-      xScore = 0;
-      oScore = 0;
-      for (int i = 0; i < 9; i++) {
-        displayElement[i] = '';
-      }
-    });
-    filledBoxes = 0;
-  }
 }
 
 
