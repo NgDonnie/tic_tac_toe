@@ -15,3 +15,13 @@ class MainApp extends StatelessWidget {
     );
   }
 }
+
+
+/*
+
+TODO
+
+-UPDATE LOGIC OF RESET BOARD
+-UPDATE LOGIC OF CLEAR SCOREBOARD
+
+*/
